@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>zzr</title>
+    <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+            font-family: Arial, sans-serif;
+            
+        }
+
+        #viewDiv {
+            height: calc(100% - 50px); /* Subtracting header height */
+            width: 100%;
+        }
+
+        #header {
+            height: 50px;
+            width: 100%;
+            background-color: red;
+            display: flex; /* Using flex layout for header content */
+            justify-content: center; /* Centering content horizontally */
+            align-items: center; /* Centering content vertically */
+        }
+
+        #header span {
+            font-size: 24px; /* Adjusting font size to be proportional */
+            color: white; /* Setting color to white for better contrast */
+        }
+    </style>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.29/"></script>
+    <script>
+        require([
+            "esri/Map",
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer",
+            "esri/widgets/ScaleBar",
+            "esri/widgets/LayerList",
+            "esri/widgets/Legend",
+            "esri/widgets/Search",
+            "esri/widgets/BasemapGallery", // 添加底图库模块
+            "esri/widgets/Measurement"    // 添加 Measurement 模块
+        ], function(Map, MapView, FeatureLayer, ScaleBar, LayerList, Legend, Search, BasemapGallery,  Measurement) {
+
+            var layer = new FeatureLayer({
+                url: "https://www.geosceneonline.cn/server/rest/services/Hosted/历史地震目录11/FeatureServer"
+            });
+
+            var map = new Map({
+              basemap: "dark-gray",
+                layers: [layer]
+            });
+
+            var view = new MapView({
+                container: "viewDiv",
+                map: map,
+                zoom: 3,
+                center: [102, 35] // longitude, latitude
+            });
+
+            var scaleBar = new ScaleBar({
+                view: view,
+                style: "ruler",
+                unit: "metric"
+            });
+
+            // Add the ScaleBar to the bottom left corner of the view
+            view.ui.add(scaleBar, {
+                position: "bottom-left"
+            });
+
+            var legend = new Legend({
+                view: view,
+                layerInfos: [{ layer: layer, title: "Legend" }]
+            });
+
+            // Add the legend to the bottom right corner of the view
+            view.ui.add(legend, "bottom-right");
+
+            var layerList = new LayerList({
+                view: view
+            });
+
+            // Add the LayerList to the bottom right corner of the view
+            view.ui.add(layerList, {
+                position: "bottom-right"
+            });
+
+            var searchWidget = new Search({
+                view: view
+            });
+
+            // Add the search widget to the top right corner of the view
+            view.ui.add(searchWidget, {
+                position: "top-right",
+                index: 2
+            });
+            var basemapGallery = new BasemapGallery({ // 初始化底图库
+                view: view
+            });
+
+            view.ui.add(basemapGallery, {
+                position: "top-right" // 将底图库添加到右上角
+            });
+          
+
+            var measurement = new Measurement({ // 初始化测量工具
+                view: view,
+                activeTool: "distance"
+            });
+            view.ui.add(measurement, "top-left"); // 将测量工具添加到右下角
+            
+           document.getElementById('goToGlobalView').addEventListener('click', function() {
+        view.goTo({
+            center: [100, 35],   // 全球视图的中心经纬度
+            zoom: 2           // 全球视图合适的缩放级别，可根据需要调整
+        });
+    });     
+
+        });
+    </script>
+</head>
+<body>
+    <div id="header">
+        <span>历史地震点</span>
+    </div>
+    <div id="viewDiv"></div>
+    
+    <button id="goToGlobalView" style="position: absolute; z-index: 99; top: 55px; left: 10px;">
+      全球视图
+    </button>
+</body>
+</html>
